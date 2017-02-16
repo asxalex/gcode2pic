@@ -1,4 +1,7 @@
+## CNC curve emulator
 this is a gcode emulator, which draws the picture accroding to the g-code which is widely used in CNC.
+
+the output is stored in test.png under the folder.
 
 ## usage
 $ python2 gcode_runner.py gcode_filename [width] [height]
