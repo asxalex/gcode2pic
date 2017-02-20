@@ -77,23 +77,25 @@ class Command(object):
         x = self.curx
         y = self.cury
         if x0 > x1:
-            while x > x0:
-                x -= 1
+            while x > x1:
                 y = k * x + b
                 y = round(y)
                 try:
                     img[(x, y)] = 0
+                    print (x, y), " is colored"
                 except Exception, e:
-                    print "[ATTENTION] there are points out of the pic"
+                    print "[ATTENTION] there are points out of the pic(%f, %f)" % (x, y)
+                x -= 1
         else:
             while x < x1:
-                x += 1
                 y = k * x + b
                 y = round(y)
                 try:
                     img[(x, y)] = 0
+                    print (x, y) , "is colored"
                 except Exception, e:
-                    print "[ATTENTION] there are points out of the pic"
+                    print "[ATTENTION] there are points out of the pic(%f, %f)" % (x, y)
+                x += 1
 
         return x1, y1, z1
 
