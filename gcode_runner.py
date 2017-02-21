@@ -14,6 +14,7 @@ class Command(object):
         self.funcmap = {
                 "g1": self.handle_g1,
                 "g0": self.handle_g0,
+                "t": self.handle_t,
                 }
 
         self.curx = curx
@@ -35,6 +36,9 @@ class Command(object):
             for i in range(index):
                 codes.pop()
         self.codes = codes
+
+    def handle_t(self, img):
+        return 0, 0, 0
 
     def handle_g0(self, img):
         x1 = self.curx
@@ -122,6 +126,9 @@ class Command(object):
 
         if command_name == "g00" or command_name == "g0":
             return self.funcmap["g0"](img)
+
+        if command_name.startswith("t"):
+            return self.funcmap["t"](img)
 
         return 0, 0, 0
 
