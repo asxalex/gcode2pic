@@ -14,6 +14,7 @@ class Command(object):
         self.funcmap = {
                 "g1": self.handle_g1,
                 "g0": self.handle_g0,
+                "t": self.handle_t,
                 }
 
         self.curx = curx
@@ -21,6 +22,8 @@ class Command(object):
         self.curz = curz
 
         codes = line.split()
+        if len(codes) > 0 and codes[0].lower().startswith("n"):
+            codes.pop(0)
         index = None
         for i in range(len(codes)):
             codes[i] = codes[i].lower()
@@ -33,6 +36,9 @@ class Command(object):
             for i in range(index):
                 codes.pop()
         self.codes = codes
+
+    def handle_t(self, img):
+        return 0, 0, 0
 
     def handle_g0(self, img):
         x1 = self.curx
@@ -64,7 +70,7 @@ class Command(object):
                 z1 = float(temp)
         if z1 > 0: ## don't do the curve, move to that location
             print z1
-            return x, y, z
+            return x1, y1, z1
 
         x0 = self.curx
         y0 = self.cury
@@ -118,6 +124,9 @@ class Command(object):
         if command_name == "g00" or command_name == "g0":
             return self.funcmap["g0"](img)
 
+        if command_name.startswith("t"):
+            return self.funcmap["t"](img)
+
         return 0, 0, 0
 
 class Runner(object):
@@ -130,7 +139,11 @@ class Runner(object):
         self.currenty = 0
         self.currentz = 0
 
+<<<<<<< HEAD
     def run_code(self, filename, outname):
+=======
+    def run_code(self, filename, outname="test.png"):
+>>>>>>> df128fa6b4902566fc5c2824019d1f83b01eba97
         try:
             fp = open(filename)
         except Exception, e:
@@ -150,48 +163,56 @@ class Runner(object):
 
         self.img.save(outname, "PNG")
 
-def get_max(filename):
+def get_max_x_y(filename):
     max_x = 0
     max_y = 0
     for line in open(filename):
-        snippets = line.split()
-        for i in snippets:
+        codes = line.split()
+        if len(codes) <= 0:
+            continue
+        for i in codes:
             if i.lower().startswith("x"):
-                x = float(i[1:])
-                if max_x < x:
-                    max_x = x
-                    continue
+                temp = float(i[1:])
+                if temp > max_x:
+                    max_x = temp
+                continue
             if i.lower().startswith("y"):
-                y = float(i[1:])
-                if max_y < y:
-                    max_y = y
-                    continue
+                temp = float(i[1:])
+                if temp > max_y:
+                    max_y = temp
+                continue
+
     max_x = int(max_x * 1.1)
     max_y = int(max_y * 1.1)
     return max_x, max_y
+            
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        print "usage: python2 gcode_runner.py inputfile [outfile] [width] [height]"
+        print "usage: python2 gcode_runner.py nc_filename [output_filename] [width] [height]"
         sys.exit(-1)
 
     x = 500
     y = 500
+    max_x = -1
+    max_y = -1
     if len(sys.argv) >= 2:
         filename = sys.argv[1]
 
     if len(sys.argv) >= 3:
-        outfile = sys.argv[2]
+        outname = sys.argv[2]
     else:
-        outfile = "test.png"
-
-    x, y = get_max(filename)
+        outname = "test.png"
 
     if len(sys.argv) >= 4:
-        x = int(sys.argv[3])
+        max_x = int(sys.argv[3])
     if len(sys.argv) >= 5:
-        y = int(sys.argv[4])
+        max_y = int(sys.argv[4])
 
-    runner = Runner(x, y)
-    runner.run_code(filename, outfile)
+
+    if max_x == -1 and max_y == -1:
+        max_x, max_y = get_max_x_y(filename)
+
+    runner = Runner(max_x, max_y)
+    runner.run_code(filename, outname)
 
